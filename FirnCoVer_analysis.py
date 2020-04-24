@@ -6,11 +6,9 @@ Created on Fri Apr 24 12:53:15 2020
 """
 
 import matplotlib.pyplot as plt
-import bav_lib as bl
 import numpy as np
 import h5py
 import pandas as pd
-from pandas import HDFStore
 
 filename = "data/FirnCoverData_2.0_2019_11_20.h5"
 
