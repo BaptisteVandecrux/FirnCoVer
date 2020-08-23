@@ -291,7 +291,7 @@ def multi_plot(inst_meta_df, compaction_df, var = 'daily_compaction_md',
     months = mdates.MonthLocator()  # every month
     years_fmt = mdates.DateFormatter('%Y')
     f1, ax = plt.subplots(sp1,sp2,figsize=(15, 15))
-    f1.subplots_adjust(hspace=0.2, wspace=0.1,
+    f1.subplots_adjust(hspace=0.2, wspace=0.17,
                        left = 0.08 , right = 0.95 ,
                        bottom = 0.2 , top = 0.9)
     count = -1
@@ -325,6 +325,7 @@ def multi_plot(inst_meta_df, compaction_df, var = 'daily_compaction_md',
     f1.text(0.5, 0.1, 'Year', ha='center', size = 20)
     f1.text(0.02, 0.5, title, va='center', rotation='vertical', size = 20)
     f1.savefig('figures/'+filename_out+'.png')
+    return f1, ax
 
 #%% 
 def export_gif(arr):

@@ -114,7 +114,7 @@ compaction_df = compaction_df.assign(borehole_length_m_smoothed = 0*compaction_d
 compaction_df = compaction_df.assign( borehole_shortening_m = 0*compaction_df['compaction_borehole_length_m'])
 compaction_df = compaction_df.assign( delta_L_m_smoothed = 0*compaction_df['compaction_borehole_length_m'])
 
-ind_start = 30
+ind_start = 60
 count = -1
 for site in sites:
     count = count+1
@@ -171,11 +171,16 @@ fcl.multi_plot(inst_meta_df, compaction_df,
            title =  'Borehole length (m)', 
            filename_out ='compaction_borehole_length_m')
 
-fcl.multi_plot(inst_meta_df, compaction_df,
+f, ax = fcl.multi_plot(inst_meta_df, compaction_df,
            var = 'borehole_shortening_m',
            sites = sites, sp1 = 4, sp2 = 2,
-           title =  'Borehole length change (m)',
+           title =  'Borehole total length change (m)',
            filename_out ='borehole_shortening_m')
+for k in range(np.size(ax)):
+    i,j = np.unravel_index(k, ax.shape)
+    ax[i,j].set_ylim((-1.25,0))
+f.savefig('figures/borehole_shortening_m.png')
+
 
 #%% daily compaction
 compaction_df = compaction_df.assign(daily_compaction_md = np.nan*compaction_df['compaction_borehole_length_m'])
@@ -198,17 +203,16 @@ compaction_df.loc[msk,'daily_compaction_md_smoothed'] = np.nan
 # compaction_df.loc[msk,'daily_compaction_md_smoothed']=np.nan
 
 
-fcl.multi_plot(inst_meta_df, compaction_df,
-           var = 'daily_compaction_md',
-           sites = sites, sp1 = 4, sp2 = 2,
-           title =  'Daily compaction (mm d-1)', 
-           filename_out ='daily_compaction_md')
-
-fcl.multi_plot(inst_meta_df, compaction_df,
+f, ax = fcl.multi_plot(inst_meta_df, compaction_df,
            var = 'daily_compaction_md_smoothed',
            sites = sites, sp1 = 4, sp2 = 2,
            title =  'Daily compaction (mm d$^{-1}$)',  
            filename_out ='daily_compaction_md_smoothed')
+# for k in range(np.size(ax)):
+#     i,j = np.unravel_index(k, ax.shape)
+ax[1,1].set_ylim((-2,0))
+ax[3,1].set_ylim((-2,0))
+f.savefig('figures/daily_compaction_md_smoothed.png')
 
 #%% print period where instruments where tower was not working
 for instr_nr in np.array([32, 7, 11,17]):
