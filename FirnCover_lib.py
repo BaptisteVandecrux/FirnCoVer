@@ -229,25 +229,25 @@ def load_metadata(compaction_df,filepath,sites):
 # filtering
     gradthresh = 0.1
 
-    for site in sites:
-        if site=='Summit':
-            sonic_df.loc['Summit','sonic_m']=sonic_df.loc['Summit'].interpolate()
-            sonic_df.loc['Summit','sonic_m']=smooth(sonic_df.loc['Summit','sonic_m'].values)
-        elif site=='NASA-SE':
-            sonic_df.loc['NASA-SE','sonic_m']=sonic_df.loc['NASA-SE'].interpolate()
-            sonic_df.loc['NASA-SE','sonic_m']=smooth(sonic_df.loc['NASA-SE','sonic_m'].values)
-        else:
-            # applying gradient filter on KAN-U, Crawford, EwastGRIP, EKT, Saddle and Dye-2
-            vals = sonic_df.loc[site,'sonic_m'].values
-            vals[np.isnan(vals)]=-9999
-            msk = np.where(np.abs(np.gradient(vals))>=gradthresh)[0]
-            vals[msk] = np.nan
-            vals[msk-1] = np.nan
-            vals[msk+1] = np.nan
-            vals[vals==-9999]=np.nan
-            sonic_df.loc[site,'sonic_m']=vals
-            sonic_df.loc[site,'sonic_m']=sonic_df.loc[site].interpolate(method='linear')
-            sonic_df.loc[site,'sonic_m']=smooth(sonic_df.loc[site,'sonic_m'].values)
+    # for site in sites:
+    #     if site=='Summit':
+    #         sonic_df.loc['Summit','sonic_m']=sonic_df.loc['Summit'].interpolate()
+    #         sonic_df.loc['Summit','sonic_m']=smooth(sonic_df.loc['Summit','sonic_m'].values)
+    #     elif site=='NASA-SE':
+    #         sonic_df.loc['NASA-SE','sonic_m']=sonic_df.loc['NASA-SE'].interpolate()
+    #         sonic_df.loc['NASA-SE','sonic_m']=smooth(sonic_df.loc['NASA-SE','sonic_m'].values)
+    #     else:
+    #         # applying gradient filter on KAN-U, Crawford, EwastGRIP, EKT, Saddle and Dye-2
+    #         vals = sonic_df.loc[site,'sonic_m'].values
+    #         vals[np.isnan(vals)]=-9999
+    #         msk = np.where(np.abs(np.gradient(vals))>=gradthresh)[0]
+    #         vals[msk] = np.nan
+    #         vals[msk-1] = np.nan
+    #         vals[msk+1] = np.nan
+    #         vals[vals==-9999]=np.nan
+    #         sonic_df.loc[site,'sonic_m']=vals
+    #         sonic_df.loc[site,'sonic_m']=sonic_df.loc[site].interpolate(method='linear')
+    #         sonic_df.loc[site,'sonic_m']=smooth(sonic_df.loc[site,'sonic_m'].values)
 
     for site in sonic_df.index.unique(level='sitename'):
         dd = statmeta_df.loc[site]['rtd_date']
@@ -271,16 +271,13 @@ def load_metadata(compaction_df,filepath,sites):
     rtd_df['date']=pd.to_datetime(rtd_df.daynumber_YYYYMMDD.values,format='%Y%m%d')
     rtd_df.set_index(['sitename','date'])
     
-    
     rtd_trun = rtd_df[['sitename','date','RTD_temp_avg_corrected_C']].copy().set_index(['sitename','date'])
     rtd_trun.columns = ['T_avg']
     rtd_trun[zz]=pd.DataFrame(rtd_trun.T_avg.values.tolist(),index=rtd_trun.index)
     rtd_trun.drop('T_avg',axis=1,inplace=True)
     rtd_trun.replace(-100.0,np.nan,inplace=True)
     
-    
     return statmeta_df, sonic_df, rtd_df, rtd_trun, rtd_dep, metdata_df
-
 
 #%% multiplot
 def multi_plot(inst_meta_df, compaction_df, var = 'daily_compaction_md',
@@ -312,7 +309,9 @@ def multi_plot(inst_meta_df, compaction_df, var = 'daily_compaction_md',
         ax[i,j].legend(loc='upper left')
         ax[i,j].grid(True)
         ax[i,j].set_title(site)
-        ax[i,j].set_xlim([datetime.date(2012, 5, 1), datetime.date(2019, 10, 1)])    
+        if site == 'Crawford':
+            ax[i,j].set_title('Crawford Point')
+        ax[i,j].set_xlim([datetime.date(2012, 2, 13), datetime.date(2019, 10, 1)])    
         ax[i,j].xaxis.set_major_locator(years)
         ax[i,j].xaxis.set_major_formatter(years_fmt)
         ax[i,j].xaxis.set_minor_locator(months)

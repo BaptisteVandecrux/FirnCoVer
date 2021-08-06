@@ -61,7 +61,7 @@ palette = sns.color_palette()
 # Things to change
 figex = '_200504.png' #extension for figures (name plus type)
 pathtodata = './data'
-date1 = '2020_04_27' # Date on the hdf5 file
+date1 = '2021_07_30' # Date on the hdf5 file
 sites=['Summit','KAN-U','NASA-SE','Crawford','EKT','Saddle','EastGrip','DYE-2']
 
 ### Import the FirnCover data tables. 
@@ -72,41 +72,46 @@ compaction_df, airtemp_df, inst_meta_df = fcl.import_firncover_dataset(filepath)
 # Loading side data
 statmeta_df, sonic_df, rtd_df, rtd_trun, rtd_dep,metdata_df = fcl.load_metadata(compaction_df,filepath,sites)
 
-#% Removing errorneous periods
-#Filter saddle data.
-# start = '-'
-# end = '-'
+# %% Plotting erroneous periods removed from analysis
 
-# erroneous_periods = [[13,'2018-02-20',end] ,
-# [12,'2017-05-11','2018-05-20'] ,
-# [12,'2019-07-21',end] ,
-# [10,'2019-07-29',end] ,
-# [44,'2019-07-29',end] ,
-# [42,start,'2017-10-14'] ,
-# [48,start,'2017-10-18'] ,
-# [48,'2018-05-27','2018-07-19'] ,
-# [48,start,'2017-10-18'] ,
-# [1,start,'2015-07-01'] ,
-# [1,'2017-07-01','2018-05-01'] ,
-# [1,'2019-01-12','2018-02-21'] ,
-# [1,'2017-11-06','2018-05-01'] ,
-# [35,start,'2017-09-01'] ,
-# [43,'2018-07-16',end] ]  
+erroneous_periods = [[13,'2018-02-20','end'] , 
+[10,'2019-07-29','end'] ,
+[42,'start','2017-10-14'] ,
+[48,'start','2017-10-18'] , 
+[48,'2018-05-27','2018-07-19'] ,
+[1,'start','2013-12-01'] ,
+[35,'start','2016-09-15'] ,
+[43,'2018-07-16','end'] ] 
+
+for i in range(len(erroneous_periods)):
+    print(erroneous_periods[i])
+
+    if erroneous_periods[i][1] == 'start':
+        tmp = compaction_df.loc[erroneous_periods[i][0],
+                          'compaction_borehole_length_m'].loc[:erroneous_periods[i][2]]
+    elif erroneous_periods[i][2] == 'end':
+        tmp = compaction_df.loc[erroneous_periods[i][0],
+                                'compaction_borehole_length_m'].loc[erroneous_periods[i][1]:]
+    else: 
+        tmp = compaction_df.loc[erroneous_periods[i][0],
+                          'compaction_borehole_length_m'].loc[erroneous_periods[i][1]:erroneous_periods[i][2]]
+    
+    if len(tmp.loc[tmp.notnull()])==0:
+        print('already removed')
+        continue
+    plt.figure()
+    compaction_df.loc[erroneous_periods[i][0],'compaction_borehole_length_m'].plot(marker='o')
+    tmp.plot(marker='o')
+    plt.title('Instrument '+str(erroneous_periods[i][0]))
  
+# %% Removing erroneous periods from the analysis
 compaction_df.loc[13,'compaction_borehole_length_m'].loc['2018-02-20':] = np.nan
-compaction_df.loc[12,'compaction_borehole_length_m'].loc['2017-05-11':'2018-05-20'] = np.nan
-compaction_df.loc[12,'compaction_borehole_length_m'].loc['2019-07-21':] = np.nan
 compaction_df.loc[10,'compaction_borehole_length_m'].loc['2019-07-29':] = np.nan
-compaction_df.loc[44,'compaction_borehole_length_m'].loc['2019-07-29':] = np.nan
 compaction_df.loc[42,'compaction_borehole_length_m'].loc[:'2017-10-14'] = np.nan
 compaction_df.loc[48,'compaction_borehole_length_m'].loc[:'2017-10-18'] = np.nan
 compaction_df.loc[48,'compaction_borehole_length_m'].loc['2018-05-27':'2018-07-19'] = np.nan
-compaction_df.loc[48,'compaction_borehole_length_m'].loc[:'2017-10-18'] = np.nan
-compaction_df.loc[1,'compaction_borehole_length_m'].loc[:'2015-07-01'] = np.nan
-compaction_df.loc[1,'compaction_borehole_length_m'].loc['2017-07-01':'2018-05-01'] = np.nan
-compaction_df.loc[1,'compaction_borehole_length_m'].loc['2019-01-12':'2018-02-21'] = np.nan
-compaction_df.loc[1,'compaction_borehole_length_m'].loc['2017-11-06':'2018-05-01'] = np.nan
-compaction_df.loc[35,'compaction_borehole_length_m'].loc[:'2017-09-01'] = np.nan
+compaction_df.loc[1,'compaction_borehole_length_m'].loc[:'2013-12-01'] = np.nan
+compaction_df.loc[35,'compaction_borehole_length_m'].loc[:'2016-09-01'] = np.nan
 compaction_df.loc[43,'compaction_borehole_length_m'].loc['2018-07-16':] = np.nan    
 
 #%% calculating borehole shortening
@@ -125,7 +130,7 @@ for site in sites:
             if compaction_df.loc[instr_nr,'compaction_borehole_length_m'].shape[0]>ind_start:
                 
                 
-                compaction_df.loc[instr_nr,'borehole_length_m_smoothed'] =  compaction_df.loc[instr_nr,'compaction_borehole_length_m'].rolling(60,center=True, win_type='gaussian',min_periods=30).mean(std=5).values
+                compaction_df.loc[instr_nr,'borehole_length_m_smoothed'] =   compaction_df.loc[instr_nr,'compaction_borehole_length_m'].rolling(60,center=True, win_type='gaussian',min_periods=30).mean(std=5).values
                 
                 time_start =  compaction_df.loc[instr_nr,'compaction_borehole_length_m'][ind_start:].first_valid_index()
                 compaction_df.loc[instr_nr,'borehole_shortening_m'] = - compaction_df.loc[instr_nr,'compaction_borehole_length_m'].loc[time_start] + compaction_df.loc[instr_nr,'compaction_borehole_length_m'].values
@@ -142,27 +147,6 @@ msk = compaction_df['compaction_borehole_length_m'].isna()
 compaction_df.loc[msk,'borehole_length_m_smoothed'] = np.nan
 compaction_df.loc[msk,'borehole_shortening_m'] = np.nan
 compaction_df.loc[msk,'delta_L_m_smoothed'] = np.nan
-
-
-                # Spotting erroneous periods
-                # fig, ax1 = plt.subplots()
-                
-                # color = 'tab:red'
-                # ax1.set_xlabel('time (s)')
-                # ax1.set_ylabel('borehole_shortening_m', color=color)
-                # ax1.plot(compaction_df.loc[instr_nr,'borehole_shortening_m'],color=color)
-                # ax1.tick_params(axis='y', labelcolor=color)
-                
-                # ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
-                
-                # color = 'tab:blue'
-                # ax2.set_ylabel('battery_max_V', color=color)  # we already handled the x-label with ax1
-                # ax2.plot(metdata_df.loc[site,'battery_min_V'],color=color)
-                # ax2.tick_params(axis='y', labelcolor=color)
-                
-                # fig.tight_layout()  # otherwise the right y-label is slightly clipped
-                # plt.title(str(instr_nr))
-                # plt.show()
 
 #% plotting borehole length
 fcl.multi_plot(inst_meta_df, compaction_df,
@@ -189,7 +173,7 @@ compaction_df['daily_compaction_md'] = compaction_df.groupby(level=0)['compactio
 
 compaction_df = compaction_df.assign(daily_compaction_md_smoothed = np.nan*compaction_df['borehole_length_m_smoothed'])
 
-compaction_df['daily_compaction_md_smoothed'] = compaction_df.groupby(level=0)['borehole_length_m_smoothed'].diff()*1000
+compaction_df['daily_compaction_md_smoothed'] = - compaction_df.groupby(level=0)['borehole_length_m_smoothed'].diff()*1000
 # fcl.hampel(compaction_df.groupby(level=0)['borehole_length_m_smoothed'].diff(), k=30, t0=3)
 
 msk = compaction_df['borehole_length_m_smoothed'].isna()
@@ -206,12 +190,12 @@ compaction_df.loc[msk,'daily_compaction_md_smoothed'] = np.nan
 f, ax = fcl.multi_plot(inst_meta_df, compaction_df,
            var = 'daily_compaction_md_smoothed',
            sites = sites, sp1 = 4, sp2 = 2,
-           title =  'Daily compaction (mm d$^{-1}$)',  
+           title =  'Daily compaction rate (mm d$^{-1}$)',  
            filename_out ='daily_compaction_md_smoothed')
 # for k in range(np.size(ax)):
 #     i,j = np.unravel_index(k, ax.shape)
-ax[1,1].set_ylim((-2,0))
-ax[3,1].set_ylim((-2,0))
+ax[1,1].set_ylim((0, 2))
+ax[3,1].set_ylim((0,2))
 f.savefig('figures/daily_compaction_md_smoothed.png')
 
 #%% print period where instruments where tower was not working
@@ -264,6 +248,9 @@ for site in sites:
         ax2.tick_params(axis='y', labelcolor=color2)
 
         ax[i,j].set_title(site)
+        if site == 'Crawford':
+            ax[i,j].set_title('Crawford Point')
+
         ax[i,j].set_xlim([datetime.date(2012, 5, 1), datetime.date(2019, 10, 1)])    
         ax[i,j].xaxis.set_major_locator(years)
         ax[i,j].xaxis.set_major_formatter(years_fmt)
@@ -298,14 +285,16 @@ for site in sites2:
     
     sitetemp=rtd_trun.loc[site]
     sitedep = rtd_dep.loc[site]
-    n_grid = np.linspace(0,15,15)
+    n_grid = np.linspace(0,12,15)
     time=sitetemp.index.values
     temps = sitetemp.values
-    
-    surface_height = sonic_df.loc[site,'delta']
+    if site == 'Crawford':
+        temps[temps>-0.5]=np.nan    
+        print(np.nanmax(temps))
+        
+    surface_height = sonic_df.loc[site,'delta'].interpolate(limit = 24*7)
     time_surf_height = surface_height.index.get_level_values(0).values
     surface_height = surface_height.loc[ np.isin(time_surf_height, time)]
-
     temps = temps[np.isin(time, time_surf_height), :]
     time = time[np.isin(time, time_surf_height)]
 
@@ -319,27 +308,33 @@ for site in sites2:
     for kk in range(depths.shape[0]):
             tif = sp.interpolate.interp1d(depths[kk,:], temps[kk,:], bounds_error=False)
             t_interp[kk,:]= tif(n_grid)
-            
-    cax1 = ax[i,j].contourf(time,n_grid,t_interp.T, 50, extend='both',
-                            vmin=-50,
-                            vmax=0)
-    cax1.cmap.set_over('cyan')
-    cax1.cmap.set_under('black')
-    sonic_df.loc[site,'delta'].plot(ax=ax[i,j])
+    for kk in range(t_interp.shape[1]):
+        t_interp[:,kk] = pd.DataFrame(t_interp[:,kk], time).interpolate(limit = 7).values.reshape(1,-1)
+        
+    t_interp[t_interp>0]=0
+
+    cax1 = ax[i,j].contourf(time,n_grid,t_interp.T, 50, extend='neither',
+                            vmin=-50, vmax=0, zorder=0)
+    surface_height.plot(ax=ax[i,j],linewidth=3,rot=0)
 
     ax[i,j].set_title(site)
-    ax[i,j].set_ylim( 15, sonic_df.loc[site,'delta'].min()*1.2)
-    ax[i,j].set_xlim([datetime.date(2015, 5, 1), datetime.date(2019, 10, 1)])
+    if site == 'Crawford':
+        ax[i,j].set_title('Crawford Point')
+
+    ax[i,j].set_ylim( 10, sonic_df.loc[site,'delta'].min()*1.2)
+    ax[i,j].set_xlim("2015-05-21", '2019-09-04')
     
+    # ax[i,j].set_xticklabels(ax[i,j].xaxis.get_majorticklabels(),rotation=0)
     ax[i,j].xaxis.set_major_locator(years)
     ax[i,j].xaxis.set_major_formatter(years_fmt)
     ax[i,j].xaxis.set_minor_locator(months)
     ax[i,j].set_xlabel("")
     if count<len(sites2)-2:
         ax[i,j].set_xticklabels("")
-cbar_ax = f1.add_axes([0.9, 0.15, 0.02, 0.7])
+cbar_ax = f1.add_axes([0.9, 0.2, 0.02, 0.7])
 cb1 = f1.colorbar(cax1, cax=cbar_ax)
-cb1.set_label('Temperature (C)')
+cb1.set_label('Firn temperature ($^o$C)')
+cb1.set_ticks([-20, -15, -10,-5,0])  # horizontal colorbar
 f1.text(0.5, 0.1, 'Year', ha='center', size = 20)
 f1.text(0.02, 0.5, 'Depth (m)', va='center', rotation='vertical', size = 20)
 f1.savefig('figures/RTD_temp.png')
