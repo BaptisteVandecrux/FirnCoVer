@@ -163,7 +163,7 @@ f, ax = fcl.multi_plot(inst_meta_df, compaction_df,
 for k in range(np.size(ax)):
     i,j = np.unravel_index(k, ax.shape)
     ax[i,j].set_ylim((-1.25,0))
-f.savefig('figures/borehole_shortening_m.png')
+f.savefig('figures/borehole_shortening_m.tiff', dpi=600, format="tiff", pil_kwargs={"compression": "tiff_lzw"})
 
 
 #%% daily compaction
@@ -196,7 +196,7 @@ f, ax = fcl.multi_plot(inst_meta_df, compaction_df,
 #     i,j = np.unravel_index(k, ax.shape)
 ax[1,1].set_ylim((0, 2))
 ax[3,1].set_ylim((0,2))
-f.savefig('figures/daily_compaction_md_smoothed.png')
+f.savefig('figures/daily_compaction_md_smoothed.tiff', dpi=600, format="tiff", pil_kwargs={"compression": "tiff_lzw"})
 
 #%% print period where instruments where tower was not working
 for instr_nr in np.array([32, 7, 11,17]):
@@ -225,10 +225,10 @@ sonic_df.loc[pd.IndexSlice['EastGrip', '2017-11-01':], 'delta'] = np.nan
 sonic_df.loc[pd.IndexSlice['KAN-U', '2017-11-01':'2018-04-01'], 'delta'] = np.nan
 sonic_df.loc[pd.IndexSlice['EKT', '2017-11-01':'2018-04-01'], 'delta'] = np.nan
 
-f1, ax = plt.subplots(4 ,2,figsize=(15, 13))
-f1.subplots_adjust(hspace=0.2, wspace=0.2,
-                   left = 0.08 , right = 0.9 ,
-                   bottom = 0.2 , top = 0.9)
+f1, ax = plt.subplots(4,2,figsize=(15, 12))
+f1.subplots_adjust(hspace=0.2, wspace=0.17,
+                   left = 0.08 , right = 0.92,
+                   bottom = 0.08 , top = 0.94)
 count = -1
 for site in sites:
     print(site)
@@ -261,11 +261,10 @@ for site in sites:
         
     if count<len(sites)-2:
         ax[i,j].set_xticklabels("")
-f1.text(0.5, 0.1, 'Year', ha='center', size = 20)
+f1.text(0.5, 0.02, 'Year', ha='center', size = 20)
 f1.text(0.02, 0.5, 'Daily air temperature ($^o$C)', va='center', rotation='vertical', size = 20, color = color1)
 f1.text(0.95, 0.5, 'Surface height (m)', va='center', rotation='vertical', size = 20, color = color2)
-f1.savefig('figures/Ta_HS.png')
-    
+f1.savefig('figures/Ta_HS.tiff', dpi=600, format="tiff", pil_kwargs={"compression": "tiff_lzw"})
     
 #%% firn temperature
 
@@ -273,10 +272,10 @@ sites2 = sites.copy()
 sites2.remove('EastGrip')
 sites2.remove('NASA-SE')
 
-f1, ax = plt.subplots(3,2,figsize=(20, 15))
-f1.subplots_adjust(hspace=0.2, wspace=0.1,
+f1, ax = plt.subplots(3,2,figsize=(15, 10))
+f1.subplots_adjust(hspace=0.2, wspace=0.17,
                    left = 0.08 , right = 0.85 ,
-                   bottom = 0.2 , top = 0.9)
+                   bottom = -0.05 , top = 0.94)
 count = -1
 for site in sites2:
     print(site)
@@ -335,9 +334,9 @@ cbar_ax = f1.add_axes([0.9, 0.2, 0.02, 0.7])
 cb1 = f1.colorbar(cax1, cax=cbar_ax)
 cb1.set_label('Firn temperature ($^o$C)')
 cb1.set_ticks([-20, -15, -10,-5,0])  # horizontal colorbar
-f1.text(0.5, 0.1, 'Year', ha='center', size = 20)
+f1.text(0.5, 0.02, 'Year', ha='center', size = 20)
 f1.text(0.02, 0.5, 'Depth (m)', va='center', rotation='vertical', size = 20)
-f1.savefig('figures/RTD_temp.png')
+f1.savefig('figures/RTD_temp.tiff', dpi=600, format="tiff", pil_kwargs={"compression": "tiff_lzw"})
     # plt.close(f1)   
 
 
@@ -438,6 +437,6 @@ ax.xaxis.set_major_formatter(years_fmt)
 ax.xaxis.set_minor_locator(months)
 ax.set_xlabel("Year")
 ax.set_ylabel('10 m firn temperature (C)')
-f1.savefig('figures/T10.png')
+f1.savefig('figures/T10.tiff', dpi=600, format="tiff", pil_kwargs={"compression": "tiff_lzw"})
     # plt.close(f1)   
 
