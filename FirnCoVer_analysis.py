@@ -73,15 +73,14 @@ compaction_df, airtemp_df, inst_meta_df = fcl.import_firncover_dataset(filepath)
 statmeta_df, sonic_df, rtd_df, rtd_trun, rtd_dep,metdata_df = fcl.load_metadata(compaction_df,filepath,sites)
 
 # %% Plotting erroneous periods removed from analysis
-
 erroneous_periods = [[13,'2018-02-20','end'] , 
-[10,'2019-07-29','end'] ,
-[42,'start','2017-10-14'] ,
-[48,'start','2017-10-18'] , 
-[48,'2018-05-27','2018-07-19'] ,
-[1,'start','2013-12-01'] ,
-[35,'start','2016-09-15'] ,
-[43,'2018-07-16','end'] ] 
+    [10,'2019-07-29','end'] ,
+    [42,'start','2017-10-14'] ,
+    [48,'start','2017-10-18'] , 
+    [48,'2018-05-27','2018-07-19'] ,
+    [1,'start','2013-12-01'] ,
+    [35,'start','2016-09-15'] ,
+    [43,'2018-07-16','end'] ] 
 
 for i in range(len(erroneous_periods)):
     print(erroneous_periods[i])
@@ -99,11 +98,11 @@ for i in range(len(erroneous_periods)):
     if len(tmp.loc[tmp.notnull()])==0:
         print('already removed')
         continue
-    plt.figure()
+    fig = plt.figure()
     compaction_df.loc[erroneous_periods[i][0],'compaction_borehole_length_m'].plot(marker='o')
     tmp.plot(marker='o')
     plt.title('Instrument '+str(erroneous_periods[i][0]))
- 
+    fig.savefig('err_instr_'+str(erroneous_periods[i][0])+'.png')
 # %% Removing erroneous periods from the analysis
 compaction_df.loc[13,'compaction_borehole_length_m'].loc['2018-02-20':] = np.nan
 compaction_df.loc[10,'compaction_borehole_length_m'].loc['2019-07-29':] = np.nan
@@ -129,9 +128,10 @@ for site in sites:
         if  np.isin(instr_nr, np.unique(compaction_df.index.get_level_values(0))):
             if compaction_df.loc[instr_nr,'compaction_borehole_length_m'].shape[0]>ind_start:
                 
-                
-                compaction_df.loc[instr_nr,'borehole_length_m_smoothed'] =   compaction_df.loc[instr_nr,'compaction_borehole_length_m'].rolling(60,center=True, win_type='gaussian',min_periods=30).mean(std=5).values
-                
+                tmp =  compaction_df.loc[instr_nr,'compaction_borehole_length_m'].values
+                tmp[:ind_start] = np.nan
+                compaction_df.loc[instr_nr,'compaction_borehole_length_m'] = tmp
+                compaction_df.loc[instr_nr,'borehole_length_m_smoothed'] = compaction_df.loc[instr_nr,'compaction_borehole_length_m'].rolling(60,center=True, win_type='gaussian',min_periods=50).mean(std=5).values
                 time_start =  compaction_df.loc[instr_nr,'compaction_borehole_length_m'][ind_start:].first_valid_index()
                 compaction_df.loc[instr_nr,'borehole_shortening_m'] = - compaction_df.loc[instr_nr,'compaction_borehole_length_m'].loc[time_start] + compaction_df.loc[instr_nr,'compaction_borehole_length_m'].values
 
@@ -149,12 +149,6 @@ compaction_df.loc[msk,'borehole_shortening_m'] = np.nan
 compaction_df.loc[msk,'delta_L_m_smoothed'] = np.nan
 
 #% plotting borehole length
-fcl.multi_plot(inst_meta_df, compaction_df,
-           var = 'compaction_borehole_length_m',
-           sites = sites, sp1 = 4, sp2 = 2,
-           title =  'Borehole length (m)', 
-           filename_out ='compaction_borehole_length_m')
-
 f, ax = fcl.multi_plot(inst_meta_df, compaction_df,
            var = 'borehole_shortening_m',
            sites = sites, sp1 = 4, sp2 = 2,
@@ -174,26 +168,19 @@ compaction_df['daily_compaction_md'] = compaction_df.groupby(level=0)['compactio
 compaction_df = compaction_df.assign(daily_compaction_md_smoothed = np.nan*compaction_df['borehole_length_m_smoothed'])
 
 compaction_df['daily_compaction_md_smoothed'] = - compaction_df.groupby(level=0)['borehole_length_m_smoothed'].diff()*1000
-# fcl.hampel(compaction_df.groupby(level=0)['borehole_length_m_smoothed'].diff(), k=30, t0=3)
 
 msk = compaction_df['borehole_length_m_smoothed'].isna()
 compaction_df.loc[msk,'daily_compaction_md'] = np.nan
 compaction_df.loc[msk,'daily_compaction_md_smoothed'] = np.nan
-
-# msk = np.logical_or(compaction_df['daily_compaction_md']>0, compaction_df['daily_compaction_md']<-0.006)
-# compaction_df.loc[msk,'daily_compaction_md']=np.nan
-
-# msk = np.logical_or(compaction_df['daily_compaction_md_smoothed']>0, compaction_df['daily_compaction_md_smoothed']<-0.006)
-# compaction_df.loc[msk,'daily_compaction_md_smoothed']=np.nan
-
 
 f, ax = fcl.multi_plot(inst_meta_df, compaction_df,
            var = 'daily_compaction_md_smoothed',
            sites = sites, sp1 = 4, sp2 = 2,
            title =  'Daily compaction rate (mm d$^{-1}$)',  
            filename_out ='daily_compaction_md_smoothed')
-# for k in range(np.size(ax)):
-#     i,j = np.unravel_index(k, ax.shape)
+
+ax[0,1].set_ylim((-0.27, 1))
+ax[2,0].set_ylim((0, 2))
 ax[1,1].set_ylim((0, 2))
 ax[3,1].set_ylim((0,2))
 f.savefig('figures/daily_compaction_md_smoothed.tiff', dpi=600, format="tiff", pil_kwargs={"compression": "tiff_lzw"})
@@ -250,21 +237,25 @@ for site in sites:
         ax[i,j].set_title(site)
         if site == 'Crawford':
             ax[i,j].set_title('Crawford Point')
+        if site == 'EastGrip':
+            ax[i,j].set_title('EastGRIP')
 
         ax[i,j].set_xlim([datetime.date(2012, 5, 1), datetime.date(2019, 10, 1)])    
         ax[i,j].xaxis.set_major_locator(years)
         ax[i,j].xaxis.set_major_formatter(years_fmt)
         ax[i,j].xaxis.set_minor_locator(months)
-        ax[i,j].set_xlabel("")
+        if i==3:
+            ax[i,j].set_xlabel("Year")
+        else:
+            ax[i,j].set_xlabel("") 
         for k in range(2013,2020):
             ax[i,j].axvspan(*mdates.datestr2num([str(k)+'-06-01', str(k)+'-09-01']), color='orange', alpha=0.1)
         
     if count<len(sites)-2:
         ax[i,j].set_xticklabels("")
-f1.text(0.5, 0.02, 'Year', ha='center', size = 20)
 f1.text(0.02, 0.5, 'Daily air temperature ($^o$C)', va='center', rotation='vertical', size = 20, color = color1)
 f1.text(0.95, 0.5, 'Surface height (m)', va='center', rotation='vertical', size = 20, color = color2)
-f1.savefig('figures/Ta_HS.tiff', dpi=600, format="tiff", pil_kwargs={"compression": "tiff_lzw"})
+f1.savefig('figures/fig5_Ta_HS.tiff', dpi=600, format="tiff", pil_kwargs={"compression": "tiff_lzw"})
     
 #%% firn temperature
 
@@ -272,7 +263,7 @@ sites2 = sites.copy()
 sites2.remove('EastGrip')
 sites2.remove('NASA-SE')
 
-f1, ax = plt.subplots(3,2,figsize=(15, 10))
+f1, ax = plt.subplots(3,2,figsize=(15, 9))
 f1.subplots_adjust(hspace=0.2, wspace=0.17,
                    left = 0.08 , right = 0.85 ,
                    bottom = -0.05 , top = 0.94)
@@ -311,32 +302,37 @@ for site in sites2:
         t_interp[:,kk] = pd.DataFrame(t_interp[:,kk], time).interpolate(limit = 7).values.reshape(1,-1)
         
     t_interp[t_interp>0]=0
-
-    cax1 = ax[i,j].contourf(time,n_grid,t_interp.T, 50, extend='neither',
-                            vmin=-50, vmax=0, zorder=0)
+    levels = np.linspace(-30, 0, 50)
+    cax1 = ax[i,j].contourf(time,n_grid,t_interp.T, 50,extend = 'min', 
+                            levels = levels, zorder=0, 
+                            cmap='plasma')
     surface_height.plot(ax=ax[i,j],linewidth=3,rot=0)
 
     ax[i,j].set_title(site)
     if site == 'Crawford':
         ax[i,j].set_title('Crawford Point')
+    if site == 'EastGrip':
+        ax[i,j].set_title('EastGRIP')
 
     ax[i,j].set_ylim( 10, sonic_df.loc[site,'delta'].min()*1.2)
     ax[i,j].set_xlim("2015-05-21", '2019-09-04')
     
-    # ax[i,j].set_xticklabels(ax[i,j].xaxis.get_majorticklabels(),rotation=0)
     ax[i,j].xaxis.set_major_locator(years)
     ax[i,j].xaxis.set_major_formatter(years_fmt)
     ax[i,j].xaxis.set_minor_locator(months)
-    ax[i,j].set_xlabel("")
+    if i==2:
+        ax[i,j].set_xlabel("Year")
+    else:
+        ax[i,j].set_xlabel("")
     if count<len(sites2)-2:
         ax[i,j].set_xticklabels("")
 cbar_ax = f1.add_axes([0.9, 0.2, 0.02, 0.7])
 cb1 = f1.colorbar(cax1, cax=cbar_ax)
 cb1.set_label('Firn temperature ($^o$C)')
-cb1.set_ticks([-20, -15, -10,-5,0])  # horizontal colorbar
-f1.text(0.5, 0.02, 'Year', ha='center', size = 20)
+cb1.set_ticks([-50, -40, -30, -20, -10, 0])
+# f1.text(0.5, 0.02, 'Year', ha='center', size = 20)
 f1.text(0.02, 0.5, 'Depth (m)', va='center', rotation='vertical', size = 20)
-f1.savefig('figures/RTD_temp.tiff', dpi=600, format="tiff", pil_kwargs={"compression": "tiff_lzw"})
+f1.savefig('figures/fig6_RTD_temp.tiff', dpi=600, format="tiff", pil_kwargs={"compression": "tiff_lzw"})
     # plt.close(f1)   
 
 

@@ -185,36 +185,67 @@ def load_metadata(compaction_df,filepath,sites):
     for site in sites:
         msk=(metdata_df['sitename']==site) & (metdata_df['date'] < statmeta_df.loc[site,'rtd_date'])
         metdata_df.drop(metdata_df[msk].index,inplace=True)
-        if site=='NASA-SE':
-            # NASA-SE had a new tower section in 5/17; distance raised is ??, use 1.7 m for now. 
-            m2 = (metdata_df['sitename']==site) & (metdata_df['date']>'2017-05-10')
-            metdata_df.loc[m2,'sonic_range_dist_corrected_m']=metdata_df.loc[m2,'sonic_range_dist_corrected_m']-1.7
-        elif site=='Crawford':
+        if site == "NASA-SE":
+            # NASA-SE had a new tower section in 5/17; distance raised is ??, use 1.7 m for now.
+            # m2 = (metdata_df["sitename"] == site) & (metdata_df["date"] > "2017-05-10")
+            # metdata_df.loc[m2, "sonic_range_dist_corrected_m"] = (
+            #     metdata_df.loc[m2, "sonic_range_dist_corrected_m"] - 1.7
+            # )
+            m3 = (
+                (metdata_df["sitename"] == site)
+                & (metdata_df["date"] > "2017-02-12")
+                & (metdata_df["date"] < "2017-04-12")
+            )
+            metdata_df.loc[m3, "sonic_range_dist_corrected_m"] = np.nan
+        # elif site == "Crawford":
             # Crawford has bad sonic data for 11/3/17 to 2/16/18
-            m2 = (metdata_df['sitename']==site)&(metdata_df['date']>'2017-11-03')&(metdata_df['date']<'2018-02-16')
-            metdata_df.loc[m2,'sonic_range_dist_corrected_m']=np.nan
-        elif site=='EKT':
-            # EKT had a new tower section in 5/17; distance raised is 0.86 m. 
-            m2 = (metdata_df['sitename']==site)&(metdata_df['date']>'2017-05-05')
-            metdata_df.loc[m2,'sonic_range_dist_corrected_m']=metdata_df.loc[m2,'sonic_range_dist_corrected_m']-0.86
-        elif site=='Saddle':
-            # Saddle had a new tower section in 5/17; distance raised is 1.715 m. 
-            m2 = (metdata_df['sitename']==site)&(metdata_df['date']>'2017-05-07')
+            # m2 = (
+            #     (metdata_df["sitename"] == site)
+            #     & (metdata_df["date"] > "2017-11-03")
+            #     & (metdata_df["date"] < "2018-02-16")
+            # )
+            # metdata_df.loc[m2, "sonic_range_dist_corrected_m"] = np.nan
+        if site == "EKT":
+            # EKT had a new tower section in 5/17; distance raised is 0.86 m.
+            # m2 = (metdata_df["sitename"] == site) & (metdata_df["date"] > "2017-05-05")
+            # metdata_df.loc[m2, "sonic_range_dist_corrected_m"] = (
+            #     metdata_df.loc[m2, "sonic_range_dist_corrected_m"] - 0.86
+            # )
+            m2 = (metdata_df["sitename"] == site) & (metdata_df["date"] > "2018-05-15")
+            metdata_df.loc[m2, "sonic_range_dist_corrected_m"] = (
+                metdata_df.loc[m2, "sonic_range_dist_corrected_m"] - 0.5
+            )
+        # elif site == "Saddle":
+        #     # Saddle had a new tower section in 5/17; distance raised is 1.715 m.
+        #     m2 = (metdata_df["sitename"] == site) & (metdata_df["date"] > "2017-05-07")
             # metdata_df.loc[m2,'sonic_range_dist_corrected_m']=metdata_df.loc[m2,'sonic_range_dist_corrected_m']-1.715
-        elif site=='EastGrip':
-            # Eastgrip has bad sonic data for 11/7/17 onward 
-            m2 = (metdata_df['sitename']==site)&(metdata_df['date']>'2017-11-17')
-            metdata_df.loc[m2,'sonic_range_dist_corrected_m']=np.nan
-            m3 = (metdata_df['sitename']==site)  \
-                & (metdata_df['date']>'2015-10-01')\
-                    & (metdata_df['date']<'2016-04-01')
-            metdata_df.loc[m3,'sonic_range_dist_corrected_m']=np.nan
-            m4 = (metdata_df['sitename']==site)&(metdata_df['date']>'2016-12-07')&(metdata_df['date']<'2017-03-01')
-            metdata_df.loc[m4,'sonic_range_dist_corrected_m']=np.nan
-        elif site=='DYE-2':
-            # 
-            m3 = (metdata_df['sitename']==site)&(metdata_df['date']>'2015-12-24')&(metdata_df['date']<'2016-05-01')
-            metdata_df.loc[m3,'sonic_range_dist_corrected_m']=np.nan
+        # elif site == "EastGrip":
+            # Eastgrip has bad sonic data for 11/7/17 onward
+            # m2 = (metdata_df["sitename"] == site) & (metdata_df["date"] > "2017-11-17")
+            # metdata_df.loc[m2, "sonic_range_dist_corrected_m"] = np.nan
+            # m3 = (
+            #     (metdata_df["sitename"] == site)
+            #     & (metdata_df["date"] > "2015-10-01")
+            #     & (metdata_df["date"] < "2016-04-01")
+            # )
+            # metdata_df.loc[m3, "sonic_range_dist_corrected_m"] = np.nan
+            # m4 = (
+            #     (metdata_df["sitename"] == site)
+            #     & (metdata_df["date"] > "2016-12-07")
+            #     & (metdata_df["date"] < "2017-03-01")
+            # )
+            # metdata_df.loc[m4, "sonic_range_dist_corrected_m"] = np.nan
+        if site == "DYE-2":
+            m2 = (metdata_df["sitename"] == site) & (metdata_df["date"] > "2016-04-29")
+            metdata_df.loc[m2, "sonic_range_dist_corrected_m"] = (
+                metdata_df.loc[m2, "sonic_range_dist_corrected_m"] - 0.3
+            )
+            # m3 = (
+            #     (metdata_df["sitename"] == site)
+            #     & (metdata_df["date"] > "2015-12-24")
+            #     & (metdata_df["date"] < "2016-05-01")
+            # )
+            # metdata_df.loc[m3, "sonic_range_dist_corrected_m"] = np.nan
     #         m4 = (metdata_df['sitename']==site)&(metdata_df['date']>'2016-12-07')&(metdata_df['date']<'2017-03-01')
     #         metdata_df.loc[m4,'sonic_range_dist_corrected_m']=np.nan
             
@@ -228,26 +259,6 @@ def load_metadata(compaction_df,filepath,sites):
 
 # filtering
     gradthresh = 0.1
-
-    # for site in sites:
-    #     if site=='Summit':
-    #         sonic_df.loc['Summit','sonic_m']=sonic_df.loc['Summit'].interpolate()
-    #         sonic_df.loc['Summit','sonic_m']=smooth(sonic_df.loc['Summit','sonic_m'].values)
-    #     elif site=='NASA-SE':
-    #         sonic_df.loc['NASA-SE','sonic_m']=sonic_df.loc['NASA-SE'].interpolate()
-    #         sonic_df.loc['NASA-SE','sonic_m']=smooth(sonic_df.loc['NASA-SE','sonic_m'].values)
-    #     else:
-    #         # applying gradient filter on KAN-U, Crawford, EwastGRIP, EKT, Saddle and Dye-2
-    #         vals = sonic_df.loc[site,'sonic_m'].values
-    #         vals[np.isnan(vals)]=-9999
-    #         msk = np.where(np.abs(np.gradient(vals))>=gradthresh)[0]
-    #         vals[msk] = np.nan
-    #         vals[msk-1] = np.nan
-    #         vals[msk+1] = np.nan
-    #         vals[vals==-9999]=np.nan
-    #         sonic_df.loc[site,'sonic_m']=vals
-    #         sonic_df.loc[site,'sonic_m']=sonic_df.loc[site].interpolate(method='linear')
-    #         sonic_df.loc[site,'sonic_m']=smooth(sonic_df.loc[site,'sonic_m'].values)
 
     for site in sonic_df.index.unique(level='sitename'):
         dd = statmeta_df.loc[site]['rtd_date']
@@ -288,7 +299,7 @@ def multi_plot(inst_meta_df, compaction_df, var = 'daily_compaction_md',
     months = mdates.MonthLocator()  # every month
     years_fmt = mdates.DateFormatter('%Y')
     f1, ax = plt.subplots(sp1,sp2,figsize=(15, 12))
-    f1.subplots_adjust(hspace=0.2, wspace=0.17,
+    f1.subplots_adjust(hspace=0.2, wspace=0.1,
                        left = 0.08 , right = 0.98 ,
                        bottom = 0.08 , top = 0.94)
     count = -1
@@ -300,13 +311,18 @@ def multi_plot(inst_meta_df, compaction_df, var = 'daily_compaction_md',
  
         for instr_nr in ind_instr:
             if np.isin(instr_nr, np.unique(compaction_df.index.get_level_values(0))):
-                
+                ini_depth = inst_meta_df.loc[inst_meta_df.index.values == instr_nr,
+                                 'borehole_initial_length_m']
                 ax[i,j].plot(compaction_df.loc[instr_nr,var].resample('D').asfreq(),
-                             label=str(instr_nr))
+                             label='instr. '+str(instr_nr)+', Ini. len.: %0.1f m'%abs(ini_depth))
                 if var2:
                     ax[i,j].plot(compaction_df.loc[instr_nr,var2].resample('D').asfreq())
                 
-        ax[i,j].legend(loc='upper left')
+        if site in ['EKT', 'KAN-U', 'DYE-2']:
+            ax[i,j].legend(loc='upper left',ncol=2, fontsize =10)
+        else:
+            ax[i,j].legend(loc='upper left',fontsize =10)
+        
         ax[i,j].grid(True)
         ax[i,j].set_title(site)
         if site == 'Crawford':
@@ -323,7 +339,7 @@ def multi_plot(inst_meta_df, compaction_df, var = 'daily_compaction_md',
             ax[i,j].set_xticklabels("")
     f1.text(0.5, 0.02, 'Year', ha='center', size = 20)
     f1.text(0.02, 0.5, title, va='center', rotation='vertical', size = 20)
-    f1.savefig('figures/'+filename_out+'.png')
+    # f1.savefig('figures/'+filename_out+'.png')
     return f1, ax
 
 #%% 
