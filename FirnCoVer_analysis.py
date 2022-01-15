@@ -102,7 +102,7 @@ for i in range(len(erroneous_periods)):
     compaction_df.loc[erroneous_periods[i][0],'compaction_borehole_length_m'].plot(marker='o')
     tmp.plot(marker='o')
     plt.title('Instrument '+str(erroneous_periods[i][0]))
-    fig.savefig('err_instr_'+str(erroneous_periods[i][0])+'.png')
+    fig.savefig('figures/err_instr_'+str(erroneous_periods[i][0])+'.png')
 # %% Removing erroneous periods from the analysis
 compaction_df.loc[13,'compaction_borehole_length_m'].loc['2018-02-20':] = np.nan
 compaction_df.loc[10,'compaction_borehole_length_m'].loc['2019-07-29':] = np.nan
@@ -157,7 +157,8 @@ f, ax = fcl.multi_plot(inst_meta_df, compaction_df,
 for k in range(np.size(ax)):
     i,j = np.unravel_index(k, ax.shape)
     ax[i,j].set_ylim((-1.25,0))
-f.savefig('figures/borehole_shortening_m.tiff', dpi=600, format="tiff", pil_kwargs={"compression": "tiff_lzw"})
+f.savefig('figures/fig4_borehole_shortening_m.tiff', dpi=600, format="tiff", pil_kwargs={"compression": "tiff_lzw"})
+f.savefig('figures/fig4_borehole_shortening_m.pdf')
 
 
 #%% daily compaction
@@ -183,7 +184,8 @@ ax[0,1].set_ylim((-0.27, 1))
 ax[2,0].set_ylim((0, 2))
 ax[1,1].set_ylim((0, 2))
 ax[3,1].set_ylim((0,2))
-f.savefig('figures/daily_compaction_md_smoothed.tiff', dpi=600, format="tiff", pil_kwargs={"compression": "tiff_lzw"})
+f.savefig('figures/fig5_daily_compaction_md_smoothed.tiff', dpi=600, format="tiff", pil_kwargs={"compression": "tiff_lzw"})
+f.savefig('figures/fig5_daily_compaction_md_smoothed.pdf')
 
 #%% print period where instruments where tower was not working
 for instr_nr in np.array([32, 7, 11,17]):
@@ -255,7 +257,8 @@ for site in sites:
         ax[i,j].set_xticklabels("")
 f1.text(0.02, 0.5, 'Daily air temperature ($^o$C)', va='center', rotation='vertical', size = 20, color = color1)
 f1.text(0.95, 0.5, 'Surface height (m)', va='center', rotation='vertical', size = 20, color = color2)
-f1.savefig('figures/fig5_Ta_HS.tiff', dpi=600, format="tiff", pil_kwargs={"compression": "tiff_lzw"})
+f1.savefig('figures/fig6_Ta_HS.tiff', dpi=600, format="tiff", pil_kwargs={"compression": "tiff_lzw"})
+f1.savefig('figures/fig6_Ta_HS.pdf')
     
 #%% firn temperature
 

@@ -314,15 +314,15 @@ def multi_plot(inst_meta_df, compaction_df, var = 'daily_compaction_md',
                 ini_depth = inst_meta_df.loc[inst_meta_df.index.values == instr_nr,
                                  'borehole_initial_length_m']
                 ax[i,j].plot(compaction_df.loc[instr_nr,var].resample('D').asfreq(),
-                             label='instr. '+str(instr_nr)+', Ini. len.: %0.1f m'%abs(ini_depth))
+                             label='instr. '+str(instr_nr)+', ini. len.: %0.1f m'%abs(ini_depth))
                 if var2:
                     ax[i,j].plot(compaction_df.loc[instr_nr,var2].resample('D').asfreq())
                 
         if site in ['EKT', 'KAN-U', 'DYE-2']:
-            ax[i,j].legend(loc='upper left',ncol=2, fontsize =10)
+            ax[i,j].legend(loc='upper left',ncol=2, fontsize =12)
         else:
-            ax[i,j].legend(loc='upper left',fontsize =10)
-        
+            ax[i,j].legend(loc='upper left',fontsize =12)
+        # ax[i,j].legend(loc='lower left',ncol=1, fontsize =12)
         ax[i,j].grid(True)
         ax[i,j].set_title(site)
         if site == 'Crawford':
