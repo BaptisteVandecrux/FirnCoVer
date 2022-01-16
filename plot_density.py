@@ -150,21 +150,22 @@ df = df.loc[df.site!='',:]
 # %% Plotting
 
 fig, ax = plt.subplots(2,4,figsize=(9,6), sharex=True, sharey=True)
-plt.subplots_adjust(left=0.08, right=0.95, top=0.95, 
+plt.subplots_adjust(left=0.09, right=0.95, top=0.95, 
                     bottom = 0.1, wspace=0.15, hspace=0.2)
 ax = ax.flatten()
-
+plt.rc('xtick',labelsize=13)
+plt.rc('ytick',labelsize=13)
 cores = [0, 5, 8, 13, 22, 27, 37, 30]
 # cores = core_list.loc[core_list.site == 'KAN_U','core_id']
 for count, core in enumerate(cores):
-    ax[count].step(df.loc[core].density*1000, -df.loc[core].depth_mid,   where='mid')
-    ax[count].set_title(df.loc[core].name.unique()[0])
+    ax[count].step(df.loc[core].density*1000, df.loc[core].depth_mid,   where='mid')
+    ax[count].set_title(df.loc[core].name.unique()[0],fontsize=13)
     ax[count].set_xlim(200,950)
-    ax[count].set_ylim(-15, 0)
-    ax[count].grid()
-fig.text(0.5, 0.02, 'Density (kg m$^{-3}$)', ha='center', size = 12)
-fig.text(0.02, 0.5, 'Depth (m)', va='center', rotation='vertical', size = 12)
-plt.savefig('core_all.png')
+    ax[count].set_ylim(15, 0)
+fig.text(0.5, 0.02, 'Density (kg m$^{-3}$)', ha='center', size = 13)
+fig.text(0.02, 0.5, 'Depth (m)', va='center', rotation='vertical', size = 13)
+plt.savefig('figures/fig3.png')
+plt.savefig('figures/fig3.pdf')
 
         
 
