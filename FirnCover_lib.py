@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import datetime
 import matplotlib.dates as mdates
 
-#%% Constants
+#% Constants
 R          = 8.314                          # gas constant used to calculate Arrhenius's term
 S_PER_YEAR = 31557600.0                     # number of seconds in a year
 spy = S_PER_YEAR
@@ -28,10 +28,7 @@ P_0 = 1.01325e5
 epoch =np.datetime64('1970-01-01')
 
 
-#%% functions
-
-
-#%% Put the 'virtual' holes into the frame (i.e. the differential compaction between holes), Summit, EGRIP only for now.
+#% Put the 'virtual' holes into the frame (i.e. the differential compaction between holes), Summit, EGRIP only for now.
 def differential_compaction(compaction_df): 
     #### Removing bad time step at EastGRIP
     # compaction_df.loc[28,'2015-05-28']=compaction_df.loc[28,'2015-05-29']
@@ -82,7 +79,7 @@ def differential_compaction(compaction_df):
     
     return compaction_df
 
-#%% Loading function
+#% Loading function
 def import_firncover_dataset(filepath):
     CVNfile=tb.open_file(filepath, mode='r', driver="H5FD_CORE")
     datatable=CVNfile.root.FirnCover
@@ -150,7 +147,7 @@ def import_firncover_dataset(filepath):
     
     return compaction_df_out, airtemp_df, inst_meta_df
 
-#%% Loading metadata, RTD and sonic ranger
+#% Loading metadata, RTD and sonic ranger
 def load_metadata(compaction_df,filepath,sites):
     CVNfile=tb.open_file(filepath, mode='r', driver="H5FD_CORE")
     datatable=CVNfile.root.FirnCover
@@ -290,7 +287,7 @@ def load_metadata(compaction_df,filepath,sites):
     
     return statmeta_df, sonic_df, rtd_df, rtd_trun, rtd_dep, metdata_df
 
-#%% multiplot
+#% multiplot
 def multi_plot(inst_meta_df, compaction_df, var = 'daily_compaction_md',
                var2 = '',
                sites = 'Summit', sp1 = 4, sp2 = 2,
@@ -313,10 +310,11 @@ def multi_plot(inst_meta_df, compaction_df, var = 'daily_compaction_md',
             if np.isin(instr_nr, np.unique(compaction_df.index.get_level_values(0))):
                 ini_depth = inst_meta_df.loc[inst_meta_df.index.values == instr_nr,
                                  'borehole_initial_length_m']
-                ax[i,j].plot(compaction_df.loc[instr_nr,var].resample('D').asfreq(),
+                # print(instr_nr,'\t', compaction_df.loc[instr_nr,var].index[0],'\t', compaction_df.loc[instr_nr,var].index[-1])
+                ax[i,j].plot(compaction_df.loc[instr_nr,var], 
                              label='instr. '+str(instr_nr)+', ini. len.: %0.1f m'%abs(ini_depth))
                 if var2:
-                    ax[i,j].plot(compaction_df.loc[instr_nr,var2].resample('D').asfreq())
+                    ax[i,j].plot(compaction_df.loc[instr_nr,var2])
                 
         if site in ['EKT', 'KAN-U', 'DYE-2']:
             ax[i,j].legend(loc='upper left',ncol=2, fontsize =12)
@@ -342,7 +340,7 @@ def multi_plot(inst_meta_df, compaction_df, var = 'daily_compaction_md',
     # f1.savefig('figures/'+filename_out+'.png')
     return f1, ax
 
-#%% 
+#% 
 def export_gif(arr):
     import imageio
     import glob
